@@ -3,17 +3,26 @@
 }
 
 .task-container {
+    display: flex;
+    flex-direction: column;
     border: 1px solid #131313;
     padding: 2rem;
+    justify-content: space-evenly;
+}
+
+.dragndrop-form {
+    background-color: rgb(117, 116, 116);
+    border: 1px solid #131313;
+    width: 80%;
 }
 
 .table {
     display: flex;
-    justify-content: center;
+    justify-content:center;
     align-items: center;
     background-color: rgb(117, 116, 116);
-    border: 1px solid #131313;
-    width: 80%;
+    /* border: 1px solid #131313; */
+    width: 100%;
 }
 
 td, th {

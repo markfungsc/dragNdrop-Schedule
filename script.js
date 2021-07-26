@@ -1,8 +1,57 @@
+// data
+const task1 = {
+    id: 1,
+    code: 124,
+    factory: "Factory 1",
+    city: "Guangdong",
+    product: "Cup",
+    timeSlot: "8 a.m."
+}
+const task2 = {
+    id: 2,
+    code: 125,
+    factory: "Factory 2",
+    city: "Sichuan",
+    product: "Table",
+    timeSlot: "2 p.m."
+}
+const task3 = {
+    id: 3,
+    code: 126,
+    factory: "Factory 3",
+    city: "Beijing",
+    product: "Light Bulb",
+    timeSlot: "10 a.m."
+}
+
+const taskList = [task1, task2, task3]
+
+//date
+function addDays(date, days) {
+    const copy = new Date(Number(date))
+    copy.setDate(date.getDate() + days)
+    return copy
+}
+
+function getDates(startDate, stopDate) {
+    var dateArray = new Array();
+    var currentDate = startDate;
+    while (currentDate <= stopDate) {
+        dateArray.push((new Date(currentDate)).getDate().toString() + "/" + ((new Date(currentDate)).getMonth() + 1).toString());
+        currentDate = addDays(currentDate, 1);
+    }
+    return dateArray;
+}
+
+const today = new Date()
+
+const dateList = getDates(today, addDays(today, 13))
+
 // rows
 const table = document.querySelector('tbody')
-const qcs = document.getElementsByClassName('qc');
-const nbOfQc = [...qcs].length;
-const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursaday", "Friday", "Saturday", "Sunday"]
+const qcs = [...document.getElementsByClassName('qc')];
+const nbOfQc = qcs.length;
+const weekDays = dateList.slice(0, 7);
 for (var j = 0; j < weekDays.length; j++) {
     const firstRow = document.createElement('tr');
     const elem = document.createElement('td');
@@ -17,6 +66,7 @@ for (var j = 0; j < weekDays.length; j++) {
     firstRow.append(am);
     for (var i = 0; i < nbOfQc; i++) {
         const label = document.createElement('td');
+        label.id = weekDays[j] + '-' + "am" + '-' + qcs[i].innerHTML;
         label.classList.add('box', 'label');
         firstRow.append(label);
     }
@@ -28,6 +78,7 @@ for (var j = 0; j < weekDays.length; j++) {
     secondRow.append(pm);
     for (var i = 0; i < nbOfQc; i++) {
         const label = document.createElement('td');
+        label.id = weekDays[j] + '-' + "pm" + '-' + qcs[i].innerHTML;
         label.classList.add('box', 'label');
         secondRow.append(label);
     }
@@ -40,6 +91,35 @@ for (var j = 0; j < weekDays.length; j++) {
 // task container
 const taskContainer = document.querySelector('.task-container');
 const createTaskButton = document.querySelector('#createTask-btn');
+const taskIcons = taskList.map(getTaskId)
+
+function getTaskId(task) {
+    return task.city + "-" + task.code;
+}
+
+taskIcons.forEach(taskIcon => {
+    const task = document.createElement('p');
+    task.classList.add('draggable');
+    task.id = taskIcon
+    task.setAttribute('draggable', 'true');
+    task.innerText = taskIcon
+    taskContainer.appendChild(task);
+
+    task.addEventListener('dragstart', () => {
+        console.log('drag start');
+        task.classList.add('dragging');
+    });
+
+    task.addEventListener('dragend', () => {
+        task.classList.remove('dragging');
+        console.log('drag end');
+    });
+
+    task.addEventListener('dblclick', () => {
+        taskContainer.appendChild(task);
+    });
+})
+
 createTaskButton.addEventListener('click', () => {
     // draggable
     const task = document.createElement('p');
