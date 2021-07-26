@@ -1,0 +1,39 @@
+.board {
+    display: flex;
+}
+
+.task-container {
+    border: 1px solid #131313;
+    padding: 2rem;
+}
+
+.table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(117, 116, 116);
+    border: 1px solid #131313;
+    width: 80%;
+}
+
+td, th {
+    border: 1px solid #fff;
+}
+
+.draggable {
+    border: 1px solid red;
+    height: 1rem;
+    width: 90%;
+    margin: 0;
+    justify-content: center;
+    text-align: center;
+    background-color: #fff;
+}
+
+.draggable.dragging {
+    opacity: 0.5;
+}
+
+.page-btn {
+    border: 1px solid rgb(12, 171, 245);
+}
