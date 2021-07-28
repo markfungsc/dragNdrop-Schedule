@@ -221,4 +221,35 @@ function getDragAfterElement(label, y) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
+//form
+var inputList = []
+
+function formHandleClick() {
+    alert("Submit form");
+    //event.preventDefault(); // disable normal form submit behavior
+    try {
+        inputList = []
+        const inputs = document.querySelectorAll('input')
+        inputs.forEach(input => {
+            const allocatedTask = {
+                qc: input.name,
+                task: input.value
+            }
+            inputList.push(allocatedTask)
+        })
+        console.log(inputList)
+    } catch(e) {
+        console.log(e)
+    }
+    return false; // prevent further bubbling of event
+}
+
+// load stored value
+var xdd = document.querySelector('.lable')
+var storedTask = taskList.filter(findTask)
+console.log(storedTask)
+
+function findTask(task) {
+    return task.code == 124
+}
 
