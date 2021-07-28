@@ -91,6 +91,8 @@ for (var j = 0; j < weekDays.length; j++) {
 // task container
 const taskContainer = document.querySelector('.task-container');
 const createTaskButton = document.querySelector('#createTask-btn');
+
+// show tasks
 const taskIcons = taskList.map(getTaskId)
 
 function getTaskId(task) {
@@ -136,6 +138,8 @@ createTaskButton.addEventListener('click', () => {
     task.addEventListener('dragend', () => {
         task.classList.remove('dragging');
         console.log('drag end');
+        const labelId = task.parentElement.id;
+        console.log(labelId);
     });
 
     task.addEventListener('dblclick', () => {
@@ -154,6 +158,7 @@ createTaskButton.addEventListener('click', () => {
 
 //box label
 const labels = document.querySelectorAll('.label');
+
 labels.forEach(label => {
     label.addEventListener('dragover', event => {
         event.preventDefault();
@@ -165,13 +170,34 @@ labels.forEach(label => {
             label.insertBefore(draggable, afterElement);
         }
     });
+
+    label.addEventListener('drop', event => {
+        event.preventDefault()
+        labels.forEach(label => {
+            const oldInputs = label.querySelectorAll('input')
+            oldInputs.forEach(input => {
+                input.remove()
+            })
+            const tasksInLabel = label.querySelectorAll('.draggable')
+            if (tasksInLabel !== null) {
+                tasksInLabel.forEach(task => {
+                    const inputElem = document.createElement('input')
+                    inputElem.setAttribute('type', 'hidden')
+                    const existingInput = label.querySelectorAll('input')
+                    inputElem.setAttribute('name', 'iuput' + '-' + label.id + '-' + existingInput.length)
+                    inputElem.value = task.id
+                    label.appendChild(inputElem)
+                })
+            }
+        })
+    })
 });
 
 // task container
 taskContainer.addEventListener('dragover', event => {
     event.preventDefault();
     const afterElement = getDragAfterElement(taskContainer, event.clientY);
-    const draggable = document.querySelector('.dragging');  
+    const draggable = document.querySelector('.dragging');
     if (afterElement == null) {
         taskContainer.appendChild(draggable);
     } else {
