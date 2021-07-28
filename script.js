@@ -1,27 +1,33 @@
 // data
-const task1 = {
+var task1 = {
     id: 1,
     code: 124,
     factory: "Factory 1",
     city: "Guangdong",
     product: "Cup",
-    timeSlot: "8 a.m."
+    timeSlot: "8 a.m.",
+    qc: null,
+    shortName: null
 }
-const task2 = {
+var task2 = {
     id: 2,
     code: 125,
     factory: "Factory 2",
     city: "Sichuan",
     product: "Table",
-    timeSlot: "2 p.m."
+    timeSlot: "2 p.m.",
+    qc: null,
+    shortName: null
 }
-const task3 = {
+var task3 = {
     id: 3,
     code: 126,
     factory: "Factory 3",
     city: "Beijing",
     product: "Light Bulb",
-    timeSlot: "10 a.m."
+    timeSlot: "10 a.m.",
+    qc: null,
+    shortName: null
 }
 
 const taskList = [task1, task2, task3]
@@ -96,7 +102,8 @@ const createTaskButton = document.querySelector('#createTask-btn');
 const taskIcons = taskList.map(getTaskId)
 
 function getTaskId(task) {
-    return task.city + "-" + task.code;
+    task.shortName = task.city + '-' + task.code
+    return task.shortName
 }
 
 taskIcons.forEach(taskIcon => {
@@ -231,13 +238,22 @@ function formHandleClick() {
         inputList = []
         const inputs = document.querySelectorAll('input')
         inputs.forEach(input => {
-            const allocatedTask = {
-                qc: input.name,
-                task: input.value
+            const strList = (input.name).split('-')
+            const qc = strList[3]
+            const order = strList[4]
+            const task = input.value
+            const inputDetail = {
+                qc: qc,
+                order: order,
+                taskShortName: task
             }
-            inputList.push(allocatedTask)
+            inputList.push(inputDetail)
         })
         console.log(inputList)
+        var xdd = document.querySelector('.lable')
+        var storedTask = taskList.filter(findTask)
+        console.log(storedTask)
+        
     } catch(e) {
         console.log(e)
     }
