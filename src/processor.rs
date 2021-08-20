@@ -26,7 +26,11 @@ impl Processor {
             EscrowInstruction::Exchange { amount } => {
                 msg!("Instruction: Exchange");
                 Self::process_exchange(accounts, amount, program_id)
-            }
+            },
+            EscrowInstruction::CancelEscrow {} => {
+                msg!("Instruction: CancelEscrow");
+                Self::process_cancel_escrow(accounts, program_id)
+            },
         }
     }
 
@@ -202,6 +206,86 @@ impl Processor {
         **initializers_main_account.lamports.borrow_mut() = initializers_main_account.lamports()
         .checked_add(escrow_account.lamports())
         .ok_or(EscrowError::AmountOverFlow)?;
+        **escrow_account.lamports.borrow_mut() = 0;
+        *escrow_account.data.borrow_mut() = &mut [];
+
+        Ok(())
+    }
+
+    fn process_cancel_escrow(
+        accounts: &[AccountInfo],
+        program_id: &Pubkey
+    ) -> ProgramResult {
+        let account_info_iter = &mut accounts.iter();
+        let cancel_account = next_account_info(account_info_iter)?;
+
+        let initializer_token_x_account = next_account_info(account_info_iter)?;
+
+        let pdas_temp_token_account = next_account_info(account_info_iter)?;
+        let pdas_temp_token_account_info =
+            TokenAccount::unpack(&pdas_temp_token_account.data.borrow())?;
+        let (pda, nonce) = Pubkey::find_program_address(&[b"escrow"], program_id);
+
+        let escrow_account = next_account_info(account_info_iter)?;
+
+        let escrow_info = Escrow::unpack(&escrow_account.data.borrow())?;
+        
+        if escrow_info.initializer_pubkey != *cancel_account.key {
+            return Err(ProgramError::InvalidAccountData);
+        }
+
+        if escrow_info.temp_token_account_pubkey != *pdas_temp_token_account.key {
+            return Err(ProgramError::InvalidAccountData);
+        }
+
+        let token_program = next_account_info(account_info_iter)?;
+
+        let pda_account = next_account_info(account_info_iter)?;
+
+        let transfer_token_x_back_to_initializer_ix = spl_token::instruction::transfer(
+            token_program.key,
+            pdas_temp_token_account.key,
+            initializer_token_x_account.key,
+            &pda,
+            &[&pda],
+            pdas_temp_token_account_info.amount,
+        )?;
+        msg!("Calling the token program to transfer tokens from temp token account back to initializer...");
+        invoke_signed(
+            &transfer_token_x_back_to_initializer_ix,
+            &[
+                pdas_temp_token_account.clone(),
+                initializer_token_x_account.clone(),
+                pda_account.clone(),
+                token_program.clone(),
+            ],
+            &[&[&b"escrow"[..], &[nonce]]],
+        )?;
+
+        let close_pdas_temp_acc_ix = spl_token::instruction::close_account(
+            token_program.key,
+            pdas_temp_token_account.key,
+            cancel_account.key,
+            &pda,
+            &[&pda],
+        )?;
+        msg!("Calling the token program to close pda's temp account...");
+        invoke_signed(
+            &close_pdas_temp_acc_ix,
+            &[
+                pdas_temp_token_account.clone(),
+                cancel_account.clone(),
+                pda_account.clone(),
+                token_program.clone(),
+            ],
+            &[&[&b"escrow"[..], &[nonce]]],
+        )?;
+
+        msg!("Closing the escrow account...");
+        **cancel_account.lamports.borrow_mut() = cancel_account
+            .lamports()
+            .checked_add(escrow_account.lamports())
+            .ok_or(EscrowError::AmountOverFlow)?;
         **escrow_account.lamports.borrow_mut() = 0;
         *escrow_account.data.borrow_mut() = &mut [];
 

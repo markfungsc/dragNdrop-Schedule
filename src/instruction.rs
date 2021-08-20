@@ -12,7 +12,19 @@ pub enum EscrowInstruction {
     Exchange {
         // The amount the taker expected to pay 
         amount: u64
-    }
+    },
+    /// Cancel by initializer
+    ///
+    ///0. `[signer]` The account of the person initializing the escrow
+    ///1. `[]` The token X account of the person initializing the escrow
+    ///2. `[writable]` PDA's temp token account
+    ///3. `[writable]` The escrow account holding the escrow info
+    ///4. `[]` The token program
+    ///5. `[]` The PDA account
+
+    CancelEscrow {
+
+    },
 }
 
 impl EscrowInstruction {
@@ -26,6 +38,7 @@ impl EscrowInstruction {
             1 => Self::Exchange {
                 amount: Self::unpack_amount(rest)?,
             },
+            2 => Self::CancelEscrow {},
             _ => return Err(InvalidInstruction.into()),
         })
     }
